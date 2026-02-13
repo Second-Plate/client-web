@@ -1,0 +1,72 @@
+[
+  {
+    "settlement_id": 103,
+    "title": "홈플러스",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "OWNER"
+  },
+  {
+    "settlement_id": 105,
+    "title": "노브랜드",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 109,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "OWNER"
+  },
+  {
+    "settlement_id": 110,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 111,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "OWNER"
+  },
+  {
+    "settlement_id": 112,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 113,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 114,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "OWNER"
+  },
+  {
+    "settlement_id": 115,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "OWNER"
+  },
+  {
+    "settlement_id": 116,
+    "title": "롯데마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "DONE",
+    "role": "MEMBER"
+  }
+]

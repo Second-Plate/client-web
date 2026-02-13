@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "type": "SETTLEMENT_COMPLETED",
+    "message": "[여행정산] 정산이 완료되었습니다.",
+    "read": false,
+    "status": "DONE",
+    "role": "MEMBER",
+    "created_at": "2025-09-07T10:00:00"
+  },
+  {
+    "id": 2,
+    "type": "DEPOSIT_REQUEST",
+    "message": "[치킨회식] 입금 요청이 도착했습니다.",
+    "read": false,
+    "status": "AWAITING_DEPOSIT",
+    "role": "MEMBER",
+    "created_at": "2025-09-07T09:30:00"
+  },
+  {
+    "id": 3,
+    "type": "DEPOSIT_CANCELED",
+    "message": "[스터디간식] 입금이 취소되었습니다.",
+    "read": true,
+    "status": "AWAITING_DEPOSIT",
+    "role": "OWNER",
+    "created_at": "2025-09-06T18:22:30"
+  },
+  {
+    "id": 4,
+    "type": "DEPOSIT_CONFIRMED",
+    "message": "[홈플러스 정산] 누군가 입금 완료했습니다.",
+    "read": false,
+    "status": "IN_PROGRESS",
+    "role": "OWNER",
+    "created_at": "2025-09-06T15:05:44"
+  },
+  {
+    "id": 5,
+    "type": "SETTLEMENT_COMPLETE_REQUEST",
+    "message": "[캠핑정산] 정산 완료 처리 요청이 도착했습니다.",
+    "read": true,
+    "status": "NEEDS_ATTENTION",
+    "role": "OWNER",
+    "created_at": "2025-09-05T13:47:00"
+  }
+]

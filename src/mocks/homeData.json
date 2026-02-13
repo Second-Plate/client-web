@@ -1,0 +1,58 @@
+[
+  {
+    "settlement_id": 101,
+    "title": "코스트코",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "NEEDS_ATTENTION",
+    "role": "OWNER"
+  },
+  {
+    "settlement_id": 102,
+    "title": "이마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "IN_PROGRESS",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 104,
+    "title": "하나로마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "IN_PROGRESS",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 106,
+    "title": "마켓컬리",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "IN_PROGRESS",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 107,
+    "title": "쿠팡마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "AWAITING_DEPOSIT",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 108,
+    "title": "GS더프레시",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "IN_PROGRESS",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 109,
+    "title": "쿠팡마트",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "AWAITING_DEPOSIT",
+    "role": "MEMBER"
+  },
+  {
+    "settlement_id": 110,
+    "title": "GS더프레시",
+    "created_at": "2025-09-06T03:37:22",
+    "status": "IN_PROGRESS",
+    "role": "MEMBER"
+  }
+]

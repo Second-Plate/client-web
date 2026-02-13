@@ -1,0 +1,43 @@
+{
+  "title": "홈플러스 정산",
+  "owner_id": 1,
+  "settlement_id": 1,
+  "data": [
+    {
+      "user": "전체",
+      "user_id": 0,
+      "paid": true,
+      "items": [
+        { "name": "콜라", "quantity": 2, "price": 1500 },
+        { "name": "치킨", "quantity": 1, "price": 18000 }
+      ]
+    },
+    {
+      "user": "김짱돌",
+      "user_id": 1,
+      "paid": true,
+      "items": [
+        { "name": "콜라", "quantity": 2, "price": 1500 },
+        { "name": "치킨", "quantity": 1, "price": 18000 }
+      ]
+    },
+    {
+      "user": "홍길동",
+      "user_id": 2,
+      "paid": false,
+      "items": [
+        { "name": "콜라", "quantity": 2, "price": 1500 },
+        { "name": "치킨", "quantity": 1, "price": 18000 }
+      ]
+    },
+    {
+      "user": "이채영",
+      "user_id": 3,
+      "paid": false,
+      "items": [
+        { "name": "콜라", "quantity": 2, "price": 1500 },
+        { "name": "치킨", "quantity": 1, "price": 18000 }
+      ]
+    }
+  ]
+}

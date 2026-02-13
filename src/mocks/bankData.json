@@ -1,0 +1,14 @@
+[
+  {
+    "account_id": 1213132,
+    "bank_name": "카카오뱅크",
+    "user_name": "이채영",
+    "account_number": "3333-33-3333333"
+  },
+  {
+    "account_id": 1213132,
+    "bank_name": "우리",
+    "user_name": "이채영",
+    "account_number": "111-22-1234567"
+  }
+]
