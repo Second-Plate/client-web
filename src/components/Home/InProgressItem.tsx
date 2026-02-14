@@ -28,9 +28,7 @@ const InProgressItem: React.FC<InProgressItemProps> = ({
   const isDone = status === "종료";
   const handleClick = useCallback(() => {
     if (status === "정산진행중") {
-      navigate(
-        `/reviewReceipt?settlementId=${encodeURIComponent(settlementId)}`
-      );
+      navigate(`/review?settlementId=${encodeURIComponent(settlementId)}`);
       return;
     }
     if (role === "OWNER") {

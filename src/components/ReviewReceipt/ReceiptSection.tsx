@@ -5,11 +5,31 @@ import EmptyDropdown from "../common/EmptyDropdown";
 import settlementManagerData from "../../mocks/settlementManagerData.json";
 import { useProfileStore } from "../../stores/profileStore";
 
-const ReceiptSection = () => {
+interface ReceiptSectionProps {
+  participantCount?: number;
+}
+
+const ReceiptSection = ({ participantCount }: ReceiptSectionProps) => {
   // TODO: api로 인원 제한 수 get 예정
   const { profile } = useProfileStore();
-  const LIMIT = 6;
-  const hap = 5;
+  const limit =
+    typeof participantCount === "number" &&
+    Number.isFinite(participantCount) &&
+    participantCount >= 2 &&
+    participantCount <= 8
+      ? participantCount
+      : 6;
+  const list = settlementManagerData.data;
+  const mine = list.find((d) => d.user === profile.nickname);
+  const total = list.find((d) => /전체/.test(d.user));
+  const others = list.filter((d) => d !== mine && d !== total);
+  const ordered = [mine, total, ...others.filter(Boolean)];
+  const participantRows = ordered.filter(
+    (entry): entry is (typeof settlementManagerData.data)[number] =>
+      entry !== undefined
+  );
+  const emptyCount = Math.max(limit - participantRows.length, 0);
+
   return (
     <ReceiptDiv>
       <TitleWrapper>
@@ -26,28 +46,20 @@ const ReceiptSection = () => {
         {dummyData2.map((it) => (
           <ReceiptDropdown key={it.user} data={it} />
         ))} */}
-        {(() => {
-          const list = settlementManagerData.data;
-          const mine = list.find((d) => d.user === profile.nickname);
-          const total = list.find((d) => /전체/.test(d.user));
-          const others = list.filter((d) => d !== mine && d !== total);
-          const ordered = [mine, total, ...others.filter(Boolean)];
-          return ordered.filter(Boolean).map((entry) => (
-            <ReceiptDropdown
-              key={entry?.user}
-              initialPaid={entry?.paid}
-              data={{
-                user: entry!.user,
-                userId: entry!.user_id,
-                items: entry!.items,
-              }}
-            />
-          ));
-        })()}
-        {LIMIT - hap > 0 &&
-          Array.from({ length: LIMIT - hap }).map((_, i) => (
-            <EmptyDropdown key={`empty-${i}`} />
-          ))}
+        {participantRows.map((entry) => (
+          <ReceiptDropdown
+            key={entry.user}
+            initialPaid={entry.paid}
+            data={{
+              user: entry.user,
+              userId: entry.user_id,
+              items: entry.items,
+            }}
+          />
+        ))}
+        {Array.from({ length: emptyCount }).map((_, i) => (
+          <EmptyDropdown key={`empty-${i}`} />
+        ))}
       </ReceiptWrapper>
     </ReceiptDiv>
   );

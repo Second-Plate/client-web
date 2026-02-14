@@ -6,54 +6,15 @@ import Carousel from "../components/ReviewReceipt/Carousel";
 import SettleupSection from "../components/ReviewReceipt/SettleupSection";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { useCallback, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { postParticipateCode } from "../apis/reviewReceiptApi";
 import LinkShareModal from "../components/ReviewReceipt/LinkShareModal";
 import BottomNav from "../components/common/BottomNav";
 import { useNavigate } from "react-router-dom";
 
-export const dummyDataMe = {
-  user: "이채영",
-  items: [
-    { name: "콜라", quantity: 2, price: 1500 },
-    { name: "치킨", quantity: 1, price: 18000 },
-  ],
-};
-
-export const dummyDataEntire = {
-  user: "전체",
-  items: [
-    { name: "콜라", quantity: 8, price: 6000 },
-    { name: "치킨", quantity: 5, price: 72000 },
-  ],
-};
-
-export const dummyData2 = [
-  {
-    user: "김짱돌",
-    items: [
-      { name: "콜라", quantity: 2, price: 1500 },
-      { name: "치킨", quantity: 1, price: 18000 },
-    ],
-  },
-  {
-    user: "홍길동",
-    items: [
-      { name: "콜라", quantity: 2, price: 1500 },
-      { name: "치킨", quantity: 1, price: 18000 },
-    ],
-  },
-  {
-    user: "최마루",
-    items: [
-      { name: "콜라", quantity: 2, price: 1500 },
-      { name: "치킨", quantity: 1, price: 18000 },
-    ],
-  },
-];
-
 const ReviewReceiptPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareCode, setShareCode] = useState<string | undefined>("ABC123");
   const [shareUrl, setShareUrl] = useState<string | undefined>(
@@ -61,9 +22,19 @@ const ReviewReceiptPage = () => {
   );
   const [searchParams] = useSearchParams();
   const settlementIdParam = searchParams.get("settlementId");
+  const participantCountParam = searchParams.get("participantCount");
   const settlementId = settlementIdParam
     ? Number(settlementIdParam)
     : undefined;
+  const participantCountFromQuery = participantCountParam
+    ? Number(participantCountParam)
+    : undefined;
+  const participantCountFromState = (
+    location.state as { participantCount?: number } | null
+  )?.participantCount;
+  const participantCount = Number.isFinite(participantCountFromQuery)
+    ? participantCountFromQuery
+    : participantCountFromState;
 
   const handleShareClick = useCallback(async () => {
     try {
@@ -104,7 +75,7 @@ const ReviewReceiptPage = () => {
         <ProgressbarCard complete={5} incomplete={3} />
       </DashboardDiv>
       <Carousel>
-        <ReceiptSection />
+        <ReceiptSection participantCount={participantCount} />
         <SettleupSection />
       </Carousel>
       <LinkShareModal

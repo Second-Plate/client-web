@@ -35,7 +35,7 @@ const HomeSectionTabs = () => {
   );
 
   useEffect(() => {
-    const fetchOngoingSettlemnet = async () => {
+    const fetchOngoingSettlement = async () => {
       const data = await getOngoingSettlement(profile.userId);
       setOngoingData(
         (data || []).map((it: any) => ({
@@ -54,7 +54,7 @@ const HomeSectionTabs = () => {
       );
     };
 
-    fetchOngoingSettlemnet();
+    fetchOngoingSettlement();
     fetchCompletedSettlement();
   }, []);
   const [tab, setTab] = useState<"inprogress" | "done">("inprogress");

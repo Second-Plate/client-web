@@ -1,19 +1,52 @@
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Receipt } from "../ReceiptConfirm/Receipt";
 import receiptData from "../../data/receiptData.json";
 import TopNav from "../../components/common/TopNav";
 import BottomNav from "../../components/common/BottomNav";
+import type { ReceiptData as OCRReceiptData } from "../../apis/ocrApi";
+import type { ReceiptItem } from "../../types/receipt";
+
+type ReceiptConfirmState = {
+  receiptData?: OCRReceiptData;
+  originalImage?: File | null;
+  participantCount?: number;
+  settlementId?: number;
+};
 
 const ReceiptConfirm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state ?? {}) as ReceiptConfirmState;
+
+  const receiptPreview = useMemo(() => {
+    const ocrReceipt = state.receiptData;
+    if (!ocrReceipt) return receiptData;
+
+    const mappedItems: ReceiptItem[] = (ocrReceipt.items || []).map((item) => ({
+      name: item.name,
+      quantity: item.count,
+      price: item.totalPrice || item.unitPrice,
+    }));
+
+    return {
+      title: ocrReceipt.storeName || receiptData.title,
+      date: ocrReceipt.date || receiptData.date,
+      items: mappedItems.length > 0 ? mappedItems : receiptData.items,
+    };
+  }, [state.receiptData]);
 
   const handleEditClick = () => {
-    navigate("/receiptedit"); 
+    navigate("/receiptedit", {
+      state,
+    });
   };
 
   const handleSettlementClick = () => {
-    navigate("/selectpeoplecount"); 
+    navigate("/selectpeoplecount", {
+      state,
+    });
   };
 
   return (
@@ -24,11 +57,10 @@ const ReceiptConfirm = () => {
         onBackClick={() => {}}
       />
       <ReceiptContainer>
-        {/* 더미데이터 사용 */}
         <Receipt 
-          title={receiptData.title}
-          date={receiptData.date}
-          items={receiptData.items}
+          title={receiptPreview.title}
+          date={receiptPreview.date}
+          items={receiptPreview.items}
         />
       </ReceiptContainer>
       <BottomNav 

@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import SelectCountImg from "../../assets/images/select_count_img.svg";
 import MinusButtonIcon from "../../assets/icons/minus_button_icon.svg";
 import PlusButtonIcon from "../../assets/icons/plus_button_icon.svg";
@@ -8,13 +8,31 @@ import BottomNav from "../../components/common/BottomNav";
 
 const SelectPeopleCount = () => {
   const navigate = useNavigate();
-  
-    const handleNextClick = () => {
-      // 다음 페이지로 이동하는 로직
-      console.log("다음 클릭");
-    };
-
+  const location = useLocation();
   const [peopleCount, setPeopleCount] = useState(2);
+
+  const handleNextClick = () => {
+    const currentParams = new URLSearchParams(location.search);
+    const nextParams = new URLSearchParams();
+    const settlementId = currentParams.get("settlementId");
+    if (settlementId && !Number.isNaN(Number(settlementId))) {
+      nextParams.set("settlementId", settlementId);
+    }
+    nextParams.set("participantCount", String(peopleCount));
+    const queryString = nextParams.toString();
+
+    const inheritedState =
+      location.state && typeof location.state === "object"
+        ? (location.state as Record<string, unknown>)
+        : {};
+
+    navigate(`/review${queryString ? `?${queryString}` : ""}`, {
+      state: {
+        ...inheritedState,
+        participantCount: peopleCount,
+      },
+    });
+  };
 
   const handleIncrement = () => {
   if (peopleCount < 8) {
@@ -131,7 +149,14 @@ const PizzaWrapper = styled.div`
   justify-content: center;
 `;
 
-const PizzaSlice = styled.div`
+interface PizzaSliceProps {
+  angle: number;
+  isVisible: boolean;
+  animationDelay: number;
+  $isFlipped: boolean;
+}
+
+const PizzaSlice = styled.div<PizzaSliceProps>`
   position: absolute;
   top: 50%;
   left: 50%;

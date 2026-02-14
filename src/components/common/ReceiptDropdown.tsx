@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { useLocation } from "react-router-dom";
 import arrowIcon from "../../assets/icons/keyboard_arrow_down.svg";
@@ -15,18 +15,32 @@ interface ReceiptDropdownProps {
   data: ReceiptData;
   initialPaid?: boolean;
   onStatusChange?: (paid: boolean) => void;
+  settlementId?: number;
 }
 
 const ReceiptDropdown: React.FC<ReceiptDropdownProps> = ({
   data,
   initialPaid = false,
   onStatusChange,
+  settlementId,
 }) => {
-  const settlementId = 0;
   const { profile } = useProfileStore();
   const { openUser, setOpenUser } = useReceiptOpenStore();
   const open = openUser === data.user;
   const location = useLocation();
+  const resolvedSettlementId = useMemo(() => {
+    if (
+      typeof settlementId === "number" &&
+      Number.isFinite(settlementId) &&
+      settlementId > 0
+    ) {
+      return settlementId;
+    }
+    const params = new URLSearchParams(location.search);
+    const parsed = Number(params.get("settlementId"));
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    return null;
+  }, [location.search, settlementId]);
   const isManagerPage = location.pathname === "/result/manager";
   const isMemberPage = location.pathname === "/result/member";
 
@@ -40,13 +54,16 @@ const ReceiptDropdown: React.FC<ReceiptDropdownProps> = ({
   );
   const totalPrice = data.items.reduce((sum, item) => sum + item.price, 0);
   const togglePaid = async () => {
-    console.log("togglePaid 클릭", isPaid);
+    if (!resolvedSettlementId) {
+      console.warn("settlementId가 없어 입금 상태를 변경할 수 없습니다.");
+      return;
+    }
     setIsPaid((prev) => {
       const next = !prev;
       onStatusChange?.(next);
       return next;
     });
-    await postChangeDepositState(settlementId, data.userId);
+    await postChangeDepositState(resolvedSettlementId, data.userId);
   };
 
   const submitUrge = async () => {
@@ -73,9 +90,13 @@ const ReceiptDropdown: React.FC<ReceiptDropdownProps> = ({
           label: "입금 완료하기",
           color: "#00D337",
           onClick: async () => {
+            if (!resolvedSettlementId) {
+              console.warn("settlementId가 없어 입금 상태를 변경할 수 없습니다.");
+              return;
+            }
             setIsPaid(true);
             onStatusChange?.(true);
-            await postChangeDepositStateManager(settlementId, data.userId);
+            await postChangeDepositStateManager(resolvedSettlementId, data.userId);
           },
         },
       ];
@@ -85,9 +106,13 @@ const ReceiptDropdown: React.FC<ReceiptDropdownProps> = ({
           label: "입금 취소하기",
           color: "#f44336",
           onClick: async () => {
+            if (!resolvedSettlementId) {
+              console.warn("settlementId가 없어 입금 상태를 변경할 수 없습니다.");
+              return;
+            }
             setIsPaid(false);
             onStatusChange?.(false);
-            await postChangeDepositStateManager(settlementId, data.userId);
+            await postChangeDepositStateManager(resolvedSettlementId, data.userId);
           },
         },
       ];

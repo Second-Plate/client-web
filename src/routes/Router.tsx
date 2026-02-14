@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ReceiptEditPage from "../pages/ReceiptEditPage";
 import InvitationCodePage from "../pages/InvitationCodePage";
 import StartSettlementPage from "../pages/StartSettlementPage";
@@ -19,6 +19,7 @@ const Router = () => {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
+          <Route index element={<Navigate to="/login" replace />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/alarm" element={<AlarmPage />} />
           <Route path="/invitationcode" element={<InvitationCodePage />} />
@@ -33,6 +34,7 @@ const Router = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/selectpeoplecount" element={<SelectPeopleCountPage />} />
           <Route path="/receiptedit" element={<ReceiptEditPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>

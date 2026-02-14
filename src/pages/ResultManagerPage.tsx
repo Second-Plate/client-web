@@ -1,29 +1,65 @@
 import styled from "styled-components";
 import ReceiptDropdown from "../components/common/ReceiptDropdown";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useProfileStore } from "../stores/profileStore";
 import FloatingAlert from "../components/Result/FloatingAlert";
 import { getReceiptListManager } from "../apis/reviewReceiptApi";
 import settlementManagerData from "../mocks/settlementManagerData.json";
 import type { ReceiptDataType } from "../types/receipt";
 
+const normalizeSettlementData = (
+  value: unknown,
+  fallbackSettlementId: number
+): ReceiptDataType => {
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "data" in value
+  ) {
+    const candidate = value as Partial<ReceiptDataType>;
+    if (Array.isArray(candidate.data)) {
+      return {
+        title: candidate.title ?? settlementManagerData.title,
+        owner_id:
+          typeof candidate.owner_id === "number"
+            ? candidate.owner_id
+            : settlementManagerData.owner_id,
+        settlement_id:
+          typeof candidate.settlement_id === "number"
+            ? candidate.settlement_id
+            : fallbackSettlementId,
+        data: candidate.data as ReceiptDataType["data"],
+      };
+    }
+  }
+  return settlementManagerData;
+};
+
 const ResultManagerPage = () => {
+  const [searchParams] = useSearchParams();
   const { profile } = useProfileStore();
+  const parsedSettlementId = Number(searchParams.get("settlementId"));
+  const settlementId =
+    Number.isFinite(parsedSettlementId) && parsedSettlementId > 0
+      ? parsedSettlementId
+      : settlementManagerData.settlement_id;
   const [settlementData, setSettlementData] = useState<ReceiptDataType>(
     settlementManagerData
   );
+
   useEffect(() => {
     const fetchReceiptList = async () => {
-      // TODO: settlementId 연결
-      const data = await getReceiptListManager(0);
-      setSettlementData(
-        (data || []).map((it: any) => ({
-          ...it,
-        }))
-      );
+      try {
+        const data = await getReceiptListManager(settlementId);
+        setSettlementData(normalizeSettlementData(data, settlementId));
+      } catch (error) {
+        console.error("정산 데이터 조회 실패", error);
+      }
     };
     fetchReceiptList();
-  }, []);
+  }, [settlementId]);
 
   const [showAlert, setShowAlert] = useState(false);
   const [bonus, setBonus] = useState(0);
@@ -57,6 +93,7 @@ const ResultManagerPage = () => {
                 <ReceiptDropdown
                   key={entry?.user}
                   initialPaid={entry?.paid}
+                  settlementId={settlementData.settlement_id || settlementId}
                   data={{
                     user: entry!.user,
                     userId: entry!.user_id,

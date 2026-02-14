@@ -1,13 +1,55 @@
-import React from 'react';
-import styled from 'styled-components';
-import LoginImg from '../assets/images/login_img.svg';
-import GoogleIcon from '../assets/icons/google_icon.svg';
+import { useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import LoginImg from "../assets/images/login_img.svg";
+import GoogleIcon from "../assets/icons/google_icon.svg";
+import { useProfileStore } from "../stores/profileStore";
 
 const LoginPage = () => {
+    const navigate = useNavigate();
+    const { profile, setProfile } = useProfileStore();
+
+    const googleLoginUrl = (() => {
+        const explicitUrl = import.meta.env.VITE_GOOGLE_LOGIN_URL as string | undefined;
+        if (explicitUrl) return explicitUrl;
+        const serverUrl = import.meta.env.VITE_SERVER_URL as string | undefined;
+        if (!serverUrl) return "";
+        return `${serverUrl.replace(/\/+$/, "")}/oauth2/authorization/google`;
+    })();
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+        if (!token) return;
+
+        const parsedUserId = Number(params.get("userId") ?? "0");
+        const userId = Number.isFinite(parsedUserId) && parsedUserId > 0 ? parsedUserId : 1;
+        const email = params.get("email") ?? "";
+        const nickname = params.get("nickname") ?? "사용자";
+
+        setProfile(() => ({
+            userId,
+            email,
+            nickname,
+            token,
+        }));
+        navigate("/home", { replace: true });
+    }, [navigate, setProfile]);
 
     const handleLoginClick = () => {
-        // 구글 로그인 로직 구현
-        alert('구글 로그인 기능이 아직 구현되지 않았습니다.');
+        if (googleLoginUrl) {
+            window.location.href = googleLoginUrl;
+            return;
+        }
+
+        // 개발 환경 fallback: 로그인 URL이 없을 경우 홈으로 진입 가능하게 처리
+        setProfile(() => ({
+            userId: profile.userId || 1,
+            email: profile.email || "guest@secondplate.local",
+            nickname: profile.nickname || "게스트",
+            token: profile.token || "dev-local-token",
+        }));
+        navigate("/home");
     };
 
     return (
@@ -63,7 +105,7 @@ const ButtonContainer = styled.div`
 const ActionButton = styled.button`
   width: 100%;
   height: 50px;
-  background-color: #fffffff;
+  background-color: #ffffff;
   color: #F44336;
   border: none;
   border-radius: 5px;
