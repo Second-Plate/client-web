@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import backIcon from "../../assets/icons/back_icon.svg";
 
 export interface TopNavProps {
   title: string;
@@ -16,7 +17,7 @@ const TopNav: React.FC<TopNavProps> = ({
     <TopNavContainer>
       {showBackButton ? (
         <BackButton onClick={onBackClick}>
-          <img src="src/assets/icons/back_icon.svg" alt="Back" />
+          <img src={backIcon} alt="Back" />
         </BackButton>
       ) : (
         <Spacer />

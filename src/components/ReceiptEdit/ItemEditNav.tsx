@@ -1,5 +1,7 @@
 import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import styled from "styled-components";
+import cancelIcon from "../../assets/icons/cancel_icon.svg";
+import editIcon from "../../assets/icons/edit_icon.svg";
 
 type ItemEditNavProps = {
   title?: string;
@@ -199,7 +201,7 @@ const ItemEditNav: React.FC<ItemEditNavProps> = ({
                   e.stopPropagation();
                   onClick();
                 }}>
-                  <img src="/src/assets/icons/edit_icon.svg" alt="Edit" />
+                  <img src={editIcon} alt="Edit" />
                 </EditIcon>
               </TitleText>
             </TitleRow>
@@ -291,7 +293,7 @@ const ItemEditNav: React.FC<ItemEditNavProps> = ({
         $keyboardHeight={keyboardHeight}
       >
         <CloseButton onClick={onClose}>
-          <img src="src\assets\icons\cancel_icon.svg" alt="Close" />
+          <img src={cancelIcon} alt="Close" />
         </CloseButton>
         
         {fieldConfigs.map((config) => (

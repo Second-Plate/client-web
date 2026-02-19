@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import backIcon from "../../assets/icons/back_icon.svg";
+import editIcon from "../../assets/icons/edit_icon.svg";
+import calendarIcon from "../../assets/icons/calendar_icon.svg";
 
 export interface TopContentProps {
   title: string;
@@ -101,7 +104,7 @@ const TopContent: React.FC<TopContentProps> = ({
     <TopContentContainer>
       <TopNavContainer>
         <BackButton onClick={onBackClick}>
-          <img src="/src/assets/icons/back_icon.svg" alt="Back" />
+          <img src={backIcon} alt="Back" />
         </BackButton>
 
         <TitleContainer onClick={handleTitleContainerClick}>
@@ -123,7 +126,7 @@ const TopContent: React.FC<TopContentProps> = ({
                   handleTitleContainerClick();
                 }}
               >
-                <img src="/src/assets/icons/edit_icon.svg" alt="Edit" />
+                <img src={editIcon} alt="Edit" />
               </EditButton>
             </Title>
           )}
@@ -154,7 +157,7 @@ const TopContent: React.FC<TopContentProps> = ({
                   handleDateContainerClick();
                 }}
               >
-                <img src="/src/assets/icons/calendar_icon.svg" alt="Calendar" />
+                <img src={calendarIcon} alt="Calendar" />
               </CalendarButton>
             </>
           )}

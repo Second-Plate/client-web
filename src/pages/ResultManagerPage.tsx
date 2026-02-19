@@ -1,43 +1,18 @@
 import styled from "styled-components";
-import ReceiptDropdown from "../components/common/ReceiptDropdown";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProfileStore } from "../stores/profileStore";
 import FloatingAlert from "../components/Result/FloatingAlert";
+import OrderedReceiptDropdownList from "../components/Result/OrderedReceiptDropdownList";
+import HomeIconButton from "../components/common/HomeIconButton";
+import BackIconButton from "../components/common/BackIconButton";
 import { getReceiptListManager } from "../apis/reviewReceiptApi";
 import settlementManagerData from "../mocks/settlementManagerData.json";
 import type { ReceiptDataType } from "../types/receipt";
-
-const normalizeSettlementData = (
-  value: unknown,
-  fallbackSettlementId: number
-): ReceiptDataType => {
-  if (
-    value &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    "data" in value
-  ) {
-    const candidate = value as Partial<ReceiptDataType>;
-    if (Array.isArray(candidate.data)) {
-      return {
-        title: candidate.title ?? settlementManagerData.title,
-        owner_id:
-          typeof candidate.owner_id === "number"
-            ? candidate.owner_id
-            : settlementManagerData.owner_id,
-        settlement_id:
-          typeof candidate.settlement_id === "number"
-            ? candidate.settlement_id
-            : fallbackSettlementId,
-        data: candidate.data as ReceiptDataType["data"],
-      };
-    }
-  }
-  return settlementManagerData;
-};
+import { normalizeSettlementData } from "../utils/settlement";
 
 const ResultManagerPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { profile } = useProfileStore();
   const parsedSettlementId = Number(searchParams.get("settlementId"));
@@ -53,7 +28,9 @@ const ResultManagerPage = () => {
     const fetchReceiptList = async () => {
       try {
         const data = await getReceiptListManager(settlementId);
-        setSettlementData(normalizeSettlementData(data, settlementId));
+        setSettlementData(
+          normalizeSettlementData(data, settlementManagerData, settlementId)
+        );
       } catch (error) {
         console.error("정산 데이터 조회 실패", error);
       }
@@ -68,6 +45,13 @@ const ResultManagerPage = () => {
     setBonus(Math.floor(Math.random() * 900 + 100));
     setShowAlert(true);
   };
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/home");
+  };
 
   useEffect(() => {
     if (!showAlert) return;
@@ -78,33 +62,17 @@ const ResultManagerPage = () => {
   return (
     <SettleupResultPageLayout>
       <TitleWrapper>
+        <BackIconButton onClick={handleBackClick} inHeader />
         <TitleP>{settlementData?.title}</TitleP>
+        <HomeIconButton onClick={() => navigate("/home")} />
       </TitleWrapper>
       <ReceiptDiv>
-        {(() => {
-          const list = settlementData?.data || [];
-          const mine = list.find((d) => d.user === profile.nickname);
-          const total = list.find((d) => /전체/.test(d.user));
-          const others = list.filter((d) => d !== mine && d !== total);
-          const ordered = [mine, total, ...others.filter(Boolean)];
-          return (
-            <>
-              {ordered.filter(Boolean).map((entry) => (
-                <ReceiptDropdown
-                  key={entry?.user}
-                  initialPaid={entry?.paid}
-                  settlementId={settlementData.settlement_id || settlementId}
-                  data={{
-                    user: entry!.user,
-                    userId: entry!.user_id,
-                    items: entry!.items,
-                  }}
-                />
-              ))}
-              <button onClick={trigger}>show floating alert</button>
-            </>
-          );
-        })()}
+        <OrderedReceiptDropdownList
+          entries={settlementData.data}
+          nickname={profile.nickname}
+          settlementId={settlementData.settlement_id || settlementId}
+        />
+        <button onClick={trigger}>show floating alert</button>
       </ReceiptDiv>
       <FloatingAlert
         show={showAlert}

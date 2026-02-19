@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from "styled-components";
+import itemAddButtonImage from "../../assets/images/item_add_button.svg";
 
 interface ItemAddButtonProps {
     onClick?: () => void;
@@ -16,7 +17,7 @@ const ItemAddButton: React.FC<ItemAddButtonProps> = ({ onClick }) => {
     
     return (
         <ItemAddButtonContainer onClick={handleAddItem}>
-            <img src="/src/assets/images/item_add_button.svg" alt="Add" />
+            <img src={itemAddButtonImage} alt="Add" />
         </ItemAddButtonContainer>
     );
 };

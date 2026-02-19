@@ -2,7 +2,6 @@ import styled from "styled-components";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StartSettlementImage from "../../assets/images/start_settlement_img.svg";
-import { type OCRResult } from "../../apis/ocrApi";
 
 const StartSettlement = () => {
   const navigate = useNavigate();
@@ -48,30 +47,6 @@ const StartSettlement = () => {
       setSelectedFile(file);
       setIsOCRLoading(true);
     }
-  };
-
-  const handleOCRSuccess = (result: OCRResult) => {
-    console.log('OCR 성공:', result);
-    setIsOCRLoading(false);
-    setSelectedFile(null);
-    
-    // OCR 결과와 함께 다음 페이지로 이동
-    // 결과 데이터를 state로 전달하거나 context/store에 저장
-    navigate('/receiptconfirm', { 
-      state: { 
-        ocrResult: result,
-        imageFile: selectedFile 
-      } 
-    });
-  };
-
-  const handleOCRError = (error: string) => {
-    console.error('OCR 실패:', error);
-    setIsOCRLoading(false);
-    setSelectedFile(null);
-    
-    // 에러 알림
-    alert(`영수증 인식에 실패했습니다: ${error}`);
   };
 
   // OCR 로딩 중이면 로딩 화면 표시

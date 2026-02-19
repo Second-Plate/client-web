@@ -1,382 +1,192 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import TopContent from "./TopContent";
+import ItemButton from "./ItemButton";
+import ItemAddButton from "./ItemAddButton";
+import ItemEditNav from "./ItemEditNav";
+import BottomNav from "../common/BottomNav";
+import receiptData from "../../data/receiptData.json";
+import type { ReceiptData as OCRReceiptData } from "../../apis/ocrApi";
+import type { ReceiptItem } from "../../types/receipt";
 
-export interface TopContentProps {
-  title: string;
-  date?: string;
-  onDateChange?: (date: string) => void;
-  onTitleChange?: (title: string) => void;
-  onBackClick?: () => void;
-  placeholder?: string;
-  showBackButton?: boolean;
-}
+type ReceiptEditState = {
+  receiptData?: OCRReceiptData;
+  editedReceipt?: {
+    title: string;
+    date: string;
+    items: ReceiptItem[];
+  };
+};
 
-const TopContent: React.FC<TopContentProps> = ({
-  title,
-  date = "",
-  onDateChange,
-  onTitleChange,
-  onBackClick,
-  placeholder = "YYYY-MM-DD",
-}) => {
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingDate, setIsEditingDate] = useState(false);
-  const [tempTitle, setTempTitle] = useState(title);
-  const [tempDate, setTempDate] = useState(date);
+type EditableItem = ReceiptItem & {
+  id: number;
+};
 
-  // 제목이 바뀌면 tempTitle도 동기화
-  React.useEffect(() => {
-    if (!isEditingTitle) setTempTitle(title);
-  }, [title, isEditingTitle]);
+const parseNumber = (value: string): number => {
+  const parsed = Number(value.replace(/[^\d]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
-  // 날짜가 바뀌면 tempDate도 동기화
-  React.useEffect(() => {
-    if (!isEditingDate) setTempDate(date);
-  }, [date, isEditingDate]);
+const ReceiptEdit = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state ?? {}) as ReceiptEditState;
 
-  // 제목 편집 모드 활성화 (편집 중이면 재진입 불가)
-  const handleTitleContainerClick = () => {
-    if (!isEditingTitle) {
-      setIsEditingTitle(true);
-      setTempTitle(title);
+  const initialReceipt = useMemo(() => {
+    const ocrReceipt = state.receiptData;
+    if (!ocrReceipt) return receiptData;
+
+    const mappedItems: ReceiptItem[] = (ocrReceipt.items || []).map((item) => ({
+      name: item.name,
+      quantity: item.count,
+      price: item.totalPrice || item.unitPrice,
+    }));
+
+    return {
+      title: ocrReceipt.storeName || receiptData.title,
+      date: ocrReceipt.date || receiptData.date,
+      items: mappedItems.length > 0 ? mappedItems : receiptData.items,
+    };
+  }, [state.receiptData]);
+
+  const [title, setTitle] = useState(initialReceipt.title);
+  const [date, setDate] = useState(initialReceipt.date);
+  const [items, setItems] = useState<EditableItem[]>(
+    initialReceipt.items.map((item, index) => ({
+      id: index + 1,
+      ...item,
+    }))
+  );
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
+
+  const editingItem = items.find((item) => item.id === editingItemId) ?? null;
+
+  const updateEditingItem = (partial: Partial<Omit<EditableItem, "id">>) => {
+    if (editingItemId === null) return;
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === editingItemId ? { ...item, ...partial } : item
+      )
+    );
+  };
+
+  const handleAddItem = () => {
+    const newItem: EditableItem = {
+      id: Date.now(),
+      name: "",
+      quantity: 1,
+      price: 0,
+    };
+    setItems((prev) => [...prev, newItem]);
+    setEditingItemId(newItem.id);
+  };
+
+  const handleNextClick = () => {
+    const currentParams = new URLSearchParams(location.search);
+    const nextParams = new URLSearchParams();
+    const settlementId = currentParams.get("settlementId");
+    if (settlementId && !Number.isNaN(Number(settlementId))) {
+      nextParams.set("settlementId", settlementId);
     }
-  };
+    const queryString = nextParams.toString();
 
-  // 날짜 편집 모드 활성화 (편집 중이면 재진입 불가)
-  const handleDateContainerClick = () => {
-    if (!isEditingDate) {
-      setIsEditingDate(true);
-      setTempDate(date);
-    }
-  };
+    const nextState: ReceiptEditState = {
+      ...state,
+      editedReceipt: {
+        title,
+        date,
+        items: items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      },
+    };
 
-  // 제목 저장
-  const handleTitleSave = () => {
-    if (onTitleChange && tempTitle.trim()) {
-      onTitleChange(tempTitle.trim());
-    }
-    setIsEditingTitle(false);
+    navigate(`/selectpeoplecount${queryString ? `?${queryString}` : ""}`, {
+      state: nextState,
+    });
   };
-
-  // 날짜 저장
-  const handleDateSave = () => {
-    if (onDateChange && tempDate) {
-      onDateChange(tempDate);
-    }
-    setIsEditingDate(false);
-  };
-
-  // 키보드 이벤트 처리
-  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleTitleSave();
-    } else if (e.key === "Escape") {
-      setTempTitle(title);
-      setIsEditingTitle(false);
-    }
-  };
-
-  const handleDateKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleDateSave();
-    } else if (e.key === "Escape") {
-      setTempDate(date);
-      setIsEditingDate(false);
-    }
-  };
-
-  // 외부 클릭으로 편집 모드 종료
-  const handleTitleBlur = () => {
-    handleTitleSave();
-  };
-
-  const handleDateBlur = () => {
-    handleDateSave();
-  };
-
-  // 20자 제한 (표시할 때는 항상 prop으로 받은 title을 사용)
-  const displayTitle = title.length > 20 ? title.slice(0, 20) + "..." : title; // 20자 넘으면 '...' 추가
 
   return (
-    <TopContentContainer>
-      <TopNavContainer>
-        <BackButton onClick={onBackClick}>
-          <img src="/src/assets/icons/back_icon.svg" alt="Back" />
-        </BackButton>
+    <PageLayout>
+      <TopContent
+        title={title}
+        date={date}
+        onTitleChange={setTitle}
+        onDateChange={setDate}
+        onBackClick={() => navigate(-1)}
+      />
 
-        {/* TitleContainer의 스타일 변경 */}
-        <TitleContainer onClick={handleTitleContainerClick}>
-          {isEditingTitle ? (
-            <TitleInput
-              value={tempTitle}
-              onChange={(e) => setTempTitle(e.target.value)}
-              onBlur={handleTitleBlur}
-              onKeyDown={handleTitleKeyDown}
-              autoFocus
-              maxLength={50}
+      <ContentSection>
+        <ItemList>
+          {items.map((item) => (
+            <ItemButton
+              key={item.id}
+              title={item.name || "품목명을 입력해 주세요"}
+              count={String(item.quantity)}
+              price={item.price.toLocaleString()}
+              onClick={() => setEditingItemId(item.id)}
             />
-          ) : (
-            <TitleWrapper> {/* TitleWrapper 추가 */}
-              <Title title={title}>
-                {displayTitle}
-              </Title>
-              <EditButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleTitleContainerClick();
-                }}
-              >
-                <img src="/src/assets/icons/edit_icon.svg" alt="Edit" />
-              </EditButton>
-            </TitleWrapper>
-          )}
-        </TitleContainer>
+          ))}
+        </ItemList>
 
-        <PlaceholderDiv />
-      </TopNavContainer>
+        <AddButtonWrapper>
+          <ItemAddButton onClick={handleAddItem} />
+        </AddButtonWrapper>
+      </ContentSection>
 
-      <DateNavContainer>
-        <DateContainer onClick={handleDateContainerClick}>
-          {isEditingDate ? (
-            <DateInput
-              type="date"
-              value={tempDate}
-              onChange={(e) => setTempDate(e.target.value)}
-              onBlur={handleDateBlur}
-              onKeyDown={handleDateKeyDown}
-              autoFocus
-            />
-          ) : (
-            <>
-              <DateRow>
-                <DateText>{date || placeholder}</DateText>
-              </DateRow>
-              <CalendarButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDateContainerClick();
-                }}
-              >
-                <img src="/src/assets/icons/calendar_icon.svg" alt="Calendar" />
-              </CalendarButton>
-            </>
-          )}
-        </DateContainer>
-      </DateNavContainer>
+      <BottomNav
+        description="수정한 영수증을 확인하고 다음 단계로 이동해 주세요."
+        primaryLabel="다음"
+        onPrimaryClick={handleNextClick}
+      />
 
-      <Divider />
-    </TopContentContainer>
+      {editingItem && (
+        <ItemEditNav
+          title={editingItem.name}
+          count={String(editingItem.quantity)}
+          price={editingItem.price.toLocaleString()}
+          onTitleChange={(next) => updateEditingItem({ name: next })}
+          onCountChange={(next) =>
+            updateEditingItem({ quantity: Math.max(parseNumber(next), 1) })
+          }
+          onPriceChange={(next) =>
+            updateEditingItem({ price: Math.max(parseNumber(next), 0) })
+          }
+          onClose={() => setEditingItemId(null)}
+          onSave={() => setEditingItemId(null)}
+        />
+      )}
+    </PageLayout>
   );
 };
 
-export default TopContent;
+export default ReceiptEdit;
 
-const TopContentContainer = styled.div`
-  width: 100%;
-  flex-shrink: 0;
+const PageLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #fff;
 `;
 
-const TopNavContainer = styled.div`
+const ContentSection = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 20px 120px;
+`;
+
+const ItemList = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const AddButtonWrapper = styled.div`
+  display: flex;
   justify-content: center;
-  width: 100%;
-  flex-shrink: 0;
-  margin-top: 45px;
-  position: relative;
-  height: 30px;
-  gap: 8px; /* BackButton, TitleContainer, PlaceholderDiv 사이 간격 */
-`;
-
-const BackButton = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px;
-  flex-shrink: 0; /* 내용이 길어져도 줄어들지 않도록 */
-
-  &:hover {
-    opacity: 0.7;
-  }
-`;
-
-const PlaceholderDiv = styled.div`
-  min-width: 40px; /* BackButton과 동일한 최소 너비 */
-  flex-shrink: 0; /* 내용이 길어져도 줄어들지 않도록 */
-`;
-
-const DateNavContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-  position: relative;
-  height: 40px;
-  padding-right: 16px;
-`;
-
-const TitleContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center; /* 전체 Wrapper를 중앙 정렬 */
-  flex-grow: 1; /* 남은 공간을 채우도록 */
-  cursor: pointer;
-  padding: 4px; /* 내부 패딩 */
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  min-width: 0; /* flex 아이템이 내용물보다 작아질 수 있도록 */
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-  }
-`;
-
-const TitleWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  flex-grow: 1;
-  min-width: 0; /* TitleWrapper도 내용물보다 작아질 수 있도록 */
-  max-width: 100%; /* 부모 TitleContainer의 너비를 넘지 않도록 */
-`;
-
-const Title = styled.h1`
-  flex-grow: 1; /* 남은 공간 채우기 */
-  min-width: 0; /* 내용이 길어도 줄어들 수 있도록 */
-  color: #000;
-  text-align: left; /* 텍스트를 왼쪽 정렬 */
-  font-family: "NanumSquare", sans-serif;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 800;
-  line-height: 130%;
-  margin: 0;
-  white-space: nowrap; /* 텍스트를 한 줄에 표시 */
-  overflow-x: scroll; /* 가로 스크롤 허용 */
-  overflow-y: hidden;
-  text-overflow: clip; /* ... 처리 대신 클립 */
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
-  padding-right: 4px; /* EditButton과의 간격 */
-
-
-  &::-webkit-scrollbar {
-    display: none; /* 웹킷 브라우저 스크롤바 숨김 */
-  }
-`;
-
-const EditButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding-left: 4px;
-  flex-shrink: 0; /* 줄어들지 않도록 */
-  img {
-    width: 12px;
-    height: 12px;
-  }
-  &:hover {
-    opacity: 0.7;
-  }
-`;
-
-const TitleInput = styled.input`
-  color: #000;
-  text-align: center;
-  font-family: "NanumSquare", sans-serif;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 800;
-  line-height: 130%;
-  margin: 0;
-  padding: 4px 8px; /* 패딩 조정 */
-  border: 2px solid #007bff;
-  border-radius: 6px;
-  background-color: #fff;
-  outline: none;
-  width: 100%; /* 부모의 100%를 차지하도록 */
-  max-width: 300px; /* 최대 너비 설정 */
-
-  &:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-  }
-`;
-
-const DateContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-  }
-`;
-
-// 날짜 표시 영역
-const DateRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 8px 12px;
-  border-radius: 8px;
-`;
-
-const DateText = styled.div`
-  color: #000;
-  text-align: right;
-  font-family: "NanumSquare", sans-serif;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 800;
-  line-height: 130%;
-  white-space: nowrap;
-`;
-
-const CalendarButton = styled.div`
-  margin-left: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  img {
-    width: 12px;
-    height: 12px;
-  }
-  &:hover {
-    opacity: 0.7;
-  }
-`;
-
-const DateInput = styled.input`
-  color: #000;
-  text-align: center;
-  font-family: "NanumSquare", sans-serif;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 800;
-  line-height: 130%;
-  margin: 0;
-  padding: 4px 8px;
-  border: 2px solid #007bff;
-  border-radius: 6px;
-  background-color: #fff;
-  outline: none;
-  width: 140px;
-
-  &:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-  }
-`;
-
-// 구분선
-const Divider = styled.hr`
-  border: none;
-  border-bottom: 2px solid #222;
-  margin: 0;
+  margin-top: 12px;
 `;

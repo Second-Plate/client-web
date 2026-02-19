@@ -31,15 +31,11 @@ interface ApiError {
     status?: number;
 }
 
-// 로딩 상태 타입
-type LoadingState = 'verifying' | 'joining' | null;
-
 const InvitationCode = () => {
     const navigate = useNavigate();
     const [codes, setCodes] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [loadingStep, setLoadingStep] = useState<LoadingState>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -189,7 +185,6 @@ const InvitationCode = () => {
 
         try {
             // 코드 유효성 검증
-            setLoadingStep('verifying');
             const verificationResult = await verifyInvitationCode(codeString, signal);
             
             if (!verificationResult.isValid) {
@@ -198,7 +193,6 @@ const InvitationCode = () => {
             }
 
             // 유효한 코드라면 참여 진행
-            setLoadingStep('joining');
             const joinResult = await joinWithInvitationCode(codeString, signal);
             
             console.log('참여 성공:', {
@@ -231,14 +225,13 @@ const InvitationCode = () => {
             inputRefs.current[0]?.focus();
         } finally {
             setIsLoading(false);
-            setLoadingStep(null);
             abortControllerRef.current = null;
         }
-    }, [codes, verifyInvitationCode, joinWithInvitationCode, navigator]);
+    }, [codes, verifyInvitationCode, joinWithInvitationCode, navigate]);
     
     // 6자리 입력 완료 시 자동 제출
     useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
         const codeString = codes.join('');
         
         if (codeString.length === 6 && !isLoading) {

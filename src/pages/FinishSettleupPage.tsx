@@ -1,12 +1,35 @@
 import styled from "styled-components";
+import { useEffect, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import finishImg from "../assets/images/finish_settleup_img.svg";
 
 const FinishSettleupPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const targetPath = useMemo(() => {
+    const settlementId = searchParams.get("settlementId");
+    if (settlementId && !Number.isNaN(Number(settlementId))) {
+      return `/result/manager?settlementId=${encodeURIComponent(settlementId)}`;
+    }
+    return "/result/manager";
+  }, [searchParams]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(targetPath, { replace: true });
+    }, 1800);
+
+    return () => clearTimeout(timer);
+  }, [navigate, targetPath]);
+
   return (
     <FinishSettleupPageLayout>
       <FinishImg src={finishImg} alt="정산완료 아이콘" />
       <FinishP>정산 완료!</FinishP>
       <LoadingP>행운의 +{34}원 주인공을 뽑는중...</LoadingP>
+      <NextButton type="button" onClick={() => navigate(targetPath)}>
+        결과 확인하기
+      </NextButton>
     </FinishSettleupPageLayout>
   );
 };
@@ -45,4 +68,16 @@ const LoadingP = styled.p`
   border-radius: 50px;
   padding: 5px 40px;
   font-size: 10px;
-`
+`;
+
+const NextButton = styled.button`
+  margin-top: 14px;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  background: transparent;
+  border-radius: 50px;
+  padding: 8px 22px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+`;

@@ -5,6 +5,7 @@ import SelectCountImg from "../../assets/images/select_count_img.svg";
 import MinusButtonIcon from "../../assets/icons/minus_button_icon.svg";
 import PlusButtonIcon from "../../assets/icons/plus_button_icon.svg";
 import BottomNav from "../../components/common/BottomNav";
+import BackIconButton from "../../components/common/BackIconButton";
 
 const SelectPeopleCount = () => {
   const navigate = useNavigate();
@@ -40,13 +41,21 @@ const SelectPeopleCount = () => {
   }
 };
 
-const handleDecrement = () => {
+  const handleDecrement = () => {
   if (peopleCount > 2) {
     setPeopleCount(prev => prev - 1);
   }
 };
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/home");
+  };
   return (
     <SelectPeopleCountLayout>
+        <BackIconButton onClick={handleBackClick} />
         <Title>정산 인원을 선택해 주세요.</Title>
         <CounterContainer>
         <PizzaContainer>
@@ -105,6 +114,7 @@ const handleDecrement = () => {
 export default SelectPeopleCount;
 
 const SelectPeopleCountLayout = styled.div`
+  position: relative;
   background-color: #FFFFFF;
   display: flex;
   flex-direction: column;

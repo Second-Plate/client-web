@@ -1,5 +1,3 @@
-import type { OCRResult, ReceiptData } from './ocrApi';
-
 // 가격 문자열을 숫자로 파싱하는 유틸리티 함수 (중복 제거)
 export function parsePrice(priceText: string): number {
   if (!priceText || typeof priceText !== 'string') return 0;

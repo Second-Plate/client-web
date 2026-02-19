@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { FaCheck } from "react-icons/fa";
 import SettleupDrawer from "./SettleupDrawer";
 import type { ItemData } from "../../mocks/settleupData";
 
@@ -18,7 +17,6 @@ const SettleupItem: React.FC<SettleupItemProps> = ({
 }) => {
   const MYNAME = "이채영";
   const [open, setOpen] = useState(false);
-  const [saved, setSaved] = useState(false);
   const myAmount = selections
     .filter((s) => s.user === MYNAME)
     .reduce<number>((a, c) => a + c.amount, 0);
@@ -45,8 +43,6 @@ const SettleupItem: React.FC<SettleupItemProps> = ({
         selections={selections}
         onSave={(val: number) => {
           onUpdateMyAmount(val);
-          setSaved(true);
-          setTimeout(() => setSaved(false), 2500);
         }}
       />
     </>

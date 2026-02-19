@@ -6,11 +6,11 @@ import Carousel from "../components/ReviewReceipt/Carousel";
 import SettleupSection from "../components/ReviewReceipt/SettleupSection";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { useCallback, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { postParticipateCode } from "../apis/reviewReceiptApi";
 import LinkShareModal from "../components/ReviewReceipt/LinkShareModal";
 import BottomNav from "../components/common/BottomNav";
-import { useNavigate } from "react-router-dom";
+import BackIconButton from "../components/common/BackIconButton";
 
 const ReviewReceiptPage = () => {
   const navigate = useNavigate();
@@ -35,6 +35,17 @@ const ReviewReceiptPage = () => {
   const participantCount = Number.isFinite(participantCountFromQuery)
     ? participantCountFromQuery
     : participantCountFromState;
+  const finishPath =
+    settlementId && !Number.isNaN(settlementId)
+      ? `/finish?settlementId=${encodeURIComponent(String(settlementId))}`
+      : "/finish";
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/home");
+  };
 
   const handleShareClick = useCallback(async () => {
     try {
@@ -64,6 +75,7 @@ const ReviewReceiptPage = () => {
   return (
     <ReviewReceiptPageLayout>
       <TitleWrapper>
+        <BackIconButton onClick={handleBackClick} inHeader />
         <TitleP>정산명</TitleP>
         <IoShareSocialOutline
           style={{ fontSize: 18, cursor: "pointer" }}
@@ -87,7 +99,7 @@ const ReviewReceiptPage = () => {
       <BottomNav
         description="밑으로 당겨서 새로고침할 수 있습니다."
         primaryLabel="정산 완료하기"
-        onPrimaryClick={() => navigate("/finish")}
+        onPrimaryClick={() => navigate(finishPath)}
       />
     </ReviewReceiptPageLayout>
   );
